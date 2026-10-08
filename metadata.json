@@ -1,0 +1,6 @@
+{
+  "name": "OGWU FX Terminal & Academy",
+  "description": "Institutional Forex Academy, Live Signals Desk, Risk & Lot Size Calculator, and Trader Mentorship by Francis Ogwu.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

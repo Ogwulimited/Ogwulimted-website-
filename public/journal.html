@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Algorithmic Trade Journal | Francis Ogwu · SMC Quantitative Desk</title>
+  <meta name="description" content="Real-time algorithmic trade records, systematic order flow executions, and live R-multiple performance telemetry.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-canvas: #090c14;
+      --bg-panel: #0e121e;
+      --bg-card: #121726;
+      --bg-card-hover: #171e30;
+      --border-panel: #1e2538;
+      --border-subtle: #182030;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #64748b;
+      --accent-green: #10b981;
+      --accent-green-bg: rgba(16, 185, 129, 0.12);
+      --accent-green-border: rgba(16, 185, 129, 0.35);
+      --accent-red: #f43f5e;
+      --accent-red-bg: rgba(244, 63, 94, 0.12);
+      --accent-red-border: rgba(244, 63, 94, 0.35);
+      --accent-blue: #38bdf8;
+      --accent-blue-bg: rgba(56, 189, 248, 0.12);
+      --accent-purple: #c084fc;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      line-height: 1.5;
+      padding: 32px 20px;
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Master Terminal Wrapper */
+    .terminal-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-panel);
+      border-radius: 28px;
+      box-shadow: 0 25px 70px -15px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Architectural ambient glows */
+    .glow-1 {
+      position: absolute;
+      top: 0;
+      right: 20%;
+      width: 500px;
+      height: 350px;
+      background: rgba(16, 185, 129, 0.04);
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+    }
+
+    .glow-2 {
+      position: absolute;
+      bottom: 10%;
+      left: 10%;
+      width: 450px;
+      height: 350px;
+      background: rgba(56, 189, 248, 0.03);
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+    }
+
+    /* Header command console */
+    .terminal-header {
+      padding: 28px 32px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(14, 18, 30, 0.85);
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #6ee7b7;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+    }
+
+    .kicker-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #34d399;
+      box-shadow: 0 0 8px #34d399;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .terminal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+      line-height: 1.15;
+    }
+
+    .terminal-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      max-width: 640px;
+      line-height: 1.5;
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: #141a28;
+      border: 1px solid #232d42;
+      border-radius: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #161c2a;
+      color: #fff;
+      border: 1px solid #27344d;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background: #1e263a;
+      border-color: #3b4d70;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981 0%, #0d9488 100%);
+      color: #022c22;
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #34d399 0%, #14b8a6 100%);
+      transform: translateY(-1px);
+    }
+
+    /* Sub-header telemetry strip */
+    .telemetry-strip {
+      padding: 12px 32px;
+      background: #0a0d16;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    /* SECTION A: LIFETIME STATS (All 8 Requirements) */
+    .stats-section {
+      padding: 32px;
+      background: #090c14;
+      border-bottom: 1px solid var(--border-subtle);
+      position: relative;
+      z-index: 10;
+    }
+
+    .section-title-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 1024px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-panel);
+      border-radius: 18px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: border-color 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card:hover {
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+
+    .stat-card.accent-emerald {
+      border-left: 3px solid var(--accent-green);
+    }
+
+    .stat-card.accent-rose {
+      border-left: 3px solid var(--accent-red);
+    }
+
+    .stat-card.accent-sky {
+      border-left: 3px solid var(--accent-blue);
+    }
+
+    .stat-card.accent-purple {
+      border-left: 3px solid var(--accent-purple);
+    }
+
+    .stat-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .stat-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 32px;
+      font-weight: 700;
+      color: #fff;
+      margin: 4px 0 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .stat-val.val-green { color: var(--accent-green); }
+    .stat-val.val-blue { color: var(--accent-blue); }
+    .stat-val.val-red { color: var(--accent-red); }
+    .stat-val.val-purple { color: var(--accent-purple); }
+
+    .stat-foot {
+      padding-top: 10px;
+      border-top: 1px solid #1a2234;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .ratio-bar {
+      width: 100%;
+      height: 6px;
+      background: #1a2336;
+      border-radius: 9999px;
+      overflow: hidden;
+      display: flex;
+      margin: 8px 0;
+    }
+
+    .ratio-bar-win { background: var(--accent-green); height: 100%; }
+    .ratio-bar-loss { background: var(--accent-red); height: 100%; }
+    .ratio-bar-timeout { background: var(--text-dim); height: 100%; }
+
+    /* SECTION B: CONTROLS & TABLE */
+    .ledger-section {
+      padding: 32px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .controls-bar {
+      padding: 14px 18px;
+      background: #0e1320;
+      border: 1px solid var(--border-panel);
+      border-radius: 16px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .pill-tabs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .pill-tab {
+      padding: 6px 12px;
+      border-radius: 10px;
+      background: #141a28;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .pill-tab:hover {
+      background: #1a2336;
+      color: #fff;
+    }
+
+    .pill-tab.active {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #6ee7b7;
+      font-weight: 600;
+    }
+
+    .filter-inputs {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .select-box, .search-box {
+      background: #141a28;
+      border: 1px solid #232d42;
+      color: var(--text-main);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      outline: none;
+    }
+
+    .select-box:focus, .search-box:focus {
+      border-color: var(--accent-green);
+    }
+
+    /* Table */
+    .table-card {
+      background: #0c101a;
+      border: 1px solid var(--border-panel);
+      border-radius: 18px;
+      overflow-x: auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+
+    th {
+      padding: 14px 16px;
+      background: #0e1320;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-panel);
+      cursor: pointer;
+      user-select: none;
+      font-weight: 600;
+      transition: color 0.15s;
+      white-space: nowrap;
+    }
+
+    th:hover {
+      color: #fff;
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #161d2e;
+      white-space: nowrap;
+      color: #e2e8f0;
+    }
+
+    tr:hover td {
+      background: #131926;
+      cursor: pointer;
+    }
+
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-bullish {
+      background: rgba(16, 185, 129, 0.15);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-bearish {
+      background: rgba(244, 63, 94, 0.15);
+      color: #fda4af;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .badge-win {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .badge-loss {
+      background: rgba(244, 63, 94, 0.2);
+      color: #fda4af;
+      border: 1px solid rgba(244, 63, 94, 0.4);
+    }
+
+    .badge-timeout {
+      background: rgba(148, 163, 184, 0.15);
+      color: #cbd5e1;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    /* Mobile Cards Container */
+    .cards-view {
+      display: none;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 1024px) {
+      .table-card { display: none; }
+      .cards-view { display: grid; }
+    }
+
+    .trade-card {
+      background: #0f1422;
+      border: 1px solid var(--border-panel);
+      border-radius: 18px;
+      padding: 16px 18px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .trade-card:hover {
+      border-color: #2c3852;
+      background: #121828;
+    }
+
+    .trade-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #1a2336;
+    }
+
+    .trade-card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    @media (min-width: 640px) {
+      .trade-card-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .trade-card-cell {
+      padding: 10px 12px;
+      background: #0a0d15;
+      border: 1px solid #1a2234;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .trade-card-cell-label {
+      font-size: 10px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-weight: 600;
+      font-family: 'Syne', sans-serif;
+      margin-bottom: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    .trade-card-cell-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .trade-card-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      padding-top: 4px;
+    }
+
+    .trade-card-meta-row1 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .trade-card-tag {
+      padding: 3px 8px;
+      background: #162032;
+      border: 1px solid #23314d;
+      border-radius: 6px;
+      color: #6ee7b7;
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    .trade-card-date {
+      color: #94a3b8;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .trade-card-note {
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: #0a0d15;
+      border: 1px solid #1a2234;
+      border-radius: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #cbd5e1;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    /* Footer guarantee */
+    .terminal-footer {
+      padding: 18px 32px;
+      background: #080b12;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    /* Friendly Empty state */
+    .empty-state {
+      padding: 56px 24px;
+      text-align: center;
+      background: #0e1320;
+      border: 1px solid var(--border-panel);
+      border-radius: 20px;
+    }
+
+    .empty-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: #141a28;
+      border: 1px solid #232d42;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      color: #34d399;
+      font-size: 22px;
+    }
+
+    .empty-state h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .empty-state p {
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 500px;
+      margin: 0 auto 20px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="terminal-card">
+      <div class="glow-1"></div>
+      <div class="glow-2"></div>
+
+      <!-- Top Header Console -->
+      <div class="terminal-header">
+        <div>
+          <div class="kicker">
+            <span class="kicker-dot"></span>
+            <span>LIVE ORDER FLOW TELEMETRY</span>
+            <span>·</span>
+            <span>PREDETERMINED 1R RISK</span>
+          </div>
+          <h1 class="terminal-title">Algorithmic Trade Journal</h1>
+          <p class="terminal-sub">
+            Real-time systematic execution ledger. Setups are synchronized directly on load with zero backend and zero sample data. All metrics update live as trades are closed by the signal bot.
+          </p>
+        </div>
+
+        <div class="header-actions">
+          <div class="status-pill">
+            <span class="kicker-dot"></span>
+            <span style="color: #e2e8f0;">Auto-Sync</span>
+            <span id="sync-counter" style="color: #64748b;">(60s)</span>
+            <button id="btn-manual-sync" style="background: none; border: none; color: #10b981; cursor: pointer; font-size: 14px; margin-left: 4px;" title="Refresh records">↻</button>
+          </div>
+          <a href="/calculator.html" class="btn btn-primary">Lot Calculator</a>
+        </div>
+      </div>
+
+      <!-- Telemetry Sub Strip -->
+      <div class="telemetry-strip">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>Feed Status:</span>
+          <span style="color: #6ee7b7; font-weight: 600;">Active & Listening</span>
+          <span id="record-count-text" style="color: #64748b;">(0 trades recorded)</span>
+        </div>
+        <div id="last-updated-text">
+          Last checked: Just now
+        </div>
+      </div>
+
+      <!-- SECTION A: LIFETIME STATS (All 8 Core Required Metrics) -->
+      <div class="stats-section">
+        <div class="section-title-bar">
+          <div>
+            <strong style="color: #fff;">Performance Analytics</strong>
+            <span style="color: #475569; margin: 0 6px;">|</span>
+            <span>Real Execution Accounting</span>
+          </div>
+          <div>Strict 1R Risk Protected</div>
+        </div>
+
+        <div class="stats-grid">
+          <!-- Stat 1: Overall Win Rate -->
+          <div class="stat-card accent-emerald">
+            <div>
+              <div class="stat-head">Overall Win Rate</div>
+              <div class="stat-val val-green" id="stat-win-rate">—</div>
+            </div>
+            <div class="stat-foot">
+              <span>Strike Accuracy</span>
+              <span id="stat-win-detail" style="color: #34d399; font-weight: 600;">Awaiting closed trades</span>
+            </div>
+          </div>
+
+          <!-- Stat 2: Wins / Losses / Timeouts -->
+          <div class="stat-card accent-sky">
+            <div>
+              <div class="stat-head">Outcome Breakdown</div>
+              <div class="ratio-bar">
+                <div class="ratio-bar-win" id="bar-win" style="width: 0%;"></div>
+                <div class="ratio-bar-timeout" id="bar-timeout" style="width: 0%;"></div>
+                <div class="ratio-bar-loss" id="bar-loss" style="width: 0%;"></div>
+              </div>
+            </div>
+            <div class="stat-foot">
+              <span id="stat-tally" style="color: #fff; font-weight: 600;">0W · 0L · 0TO</span>
+              <span>Distribution</span>
+            </div>
+          </div>
+
+          <!-- Stat 3: Cumulative Net R -->
+          <div class="stat-card accent-emerald">
+            <div>
+              <div class="stat-head">Cumulative Net R</div>
+              <div class="stat-val val-green" id="stat-net-r">0.00R</div>
+            </div>
+            <div class="stat-foot">
+              <span>Performance Yield</span>
+              <span id="stat-net-yield" style="color: #fff; font-weight: 700;">Sum of rr_actual</span>
+            </div>
+          </div>
+
+          <!-- Stat 4: Average R:R on Wins -->
+          <div class="stat-card accent-sky">
+            <div>
+              <div class="stat-head">Avg R:R on Wins</div>
+              <div class="stat-val val-blue" id="stat-avg-rr">—</div>
+            </div>
+            <div class="stat-foot">
+              <span>Target Discipline</span>
+              <span style="color: #cbd5e1;">1:2.50+ Model</span>
+            </div>
+          </div>
+
+          <!-- Stat 5: Total Trades Closed -->
+          <div class="stat-card">
+            <div>
+              <div class="stat-head">Total Trades Closed</div>
+              <div class="stat-val" id="stat-total-closed">0</div>
+            </div>
+            <div class="stat-foot">
+              <span>Execution State</span>
+              <span id="stat-open-count" style="color: #38bdf8;">0 Active Setups</span>
+            </div>
+          </div>
+
+          <!-- Stat 6: Best Trade (Peak) -->
+          <div class="stat-card accent-emerald">
+            <div>
+              <div class="stat-head">Best Trade</div>
+              <div class="stat-val val-green" id="stat-best-trade">—</div>
+            </div>
+            <div class="stat-foot">
+              <span>Single Return</span>
+              <span style="color: #34d399; font-weight: 600;">Peak Realized</span>
+            </div>
+          </div>
+
+          <!-- Stat 7: Worst Trade (Floor) -->
+          <div class="stat-card accent-rose">
+            <div>
+              <div class="stat-head">Worst Trade</div>
+              <div class="stat-val val-red" id="stat-worst-trade">—</div>
+            </div>
+            <div class="stat-foot">
+              <span>Strict Stop Loss</span>
+              <span style="color: #fda4af; font-weight: 600;">-1.00R Hard Stop</span>
+            </div>
+          </div>
+
+          <!-- Stat 8: Average Trade Duration -->
+          <div class="stat-card accent-purple">
+            <div>
+              <div class="stat-head">Avg Trade Duration</div>
+              <div class="stat-val val-purple" id="stat-avg-duration">—</div>
+            </div>
+            <div class="stat-foot">
+              <span>Session Model</span>
+              <span style="color: #c084fc;">Intraday Delivery</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION B: TRADE TABLE & MOBILE CARDS -->
+      <div class="ledger-section">
+        <!-- Controls Bar (visible when trades exist) -->
+        <div class="controls-bar" id="controls-bar" style="display: none;">
+          <div class="pill-tabs">
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #64748b; margin-right: 4px;">FILTER:</span>
+            <button class="pill-tab active" data-filter="all">All (<span id="count-all">0</span>)</button>
+            <button class="pill-tab" data-filter="win">Wins (<span id="count-win">0</span>)</button>
+            <button class="pill-tab" data-filter="loss">Losses (<span id="count-loss">0</span>)</button>
+            <button class="pill-tab" data-filter="timeout">Timeouts (<span id="count-timeout">0</span>)</button>
+          </div>
+
+          <div class="filter-inputs">
+            <select id="pair-select" class="select-box">
+              <option value="all">All Instruments</option>
+            </select>
+            <input type="text" id="search-input" class="search-box" placeholder="Search setup / note..." />
+          </div>
+        </div>
+
+        <!-- Friendly Empty state placeholder (zero sample data) -->
+        <div id="empty-state" class="empty-state">
+          <div class="empty-icon">📡</div>
+          <h3>No trades recorded yet</h3>
+          <p>
+            The algorithmic signal bot is actively scanning for Smart Money Concepts (SMC) order flow setups. As soon as trades are triggered and closed, verified execution tickets will appear here automatically.
+          </p>
+          <div style="display: inline-flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #94a3b8; background: #141a28; padding: 8px 16px; border-radius: 12px; border: 1px solid #232d42;">
+            <span class="kicker-dot"></span>
+            <span>Auto-refreshing every 60s</span>
+          </div>
+        </div>
+
+        <!-- Desktop Table View -->
+        <div class="table-card" id="table-card" style="display: none;">
+          <table>
+            <thead>
+              <tr>
+                <th data-sort="date">Date Closed <span id="sort-date">↕</span></th>
+                <th data-sort="symbol">Symbol <span id="sort-symbol">↕</span></th>
+                <th data-sort="direction">Direction <span id="sort-direction">↕</span></th>
+                <th data-sort="entry" class="text-right">Entry <span id="sort-entry">↕</span></th>
+                <th data-sort="stop" class="text-right">Stop <span id="sort-stop">↕</span></th>
+                <th data-sort="target" class="text-right">Target <span id="sort-target">↕</span></th>
+                <th data-sort="exit" class="text-right">Exit <span id="sort-exit">↕</span></th>
+                <th data-sort="outcome" class="text-center">Outcome <span id="sort-outcome">↕</span></th>
+                <th data-sort="rr_actual" class="text-right">R-Multiple <span id="sort-rr_actual">↕</span></th>
+                <th data-sort="duration" class="text-right">Duration <span id="sort-duration">↕</span></th>
+                <th data-sort="target_kind">Target Type <span id="sort-target_kind">↕</span></th>
+              </tr>
+            </thead>
+            <tbody id="trade-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Cards View -->
+        <div class="cards-view" id="cards-view" style="display: none;">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- Terminal Footer Guarantee -->
+      <div class="terminal-footer">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="color: #34d399;">✓</span>
+          <span>Verified execution telemetry. Fixed 1R risk management enforced across all trades.</span>
+        </div>
+        <div style="color: #94a3b8; font-weight: 500;">
+          Mechanical Capital Architecture · Predetermined 1R Execution Model
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DATA_SOURCE_URL = 'https://raw.githubusercontent.com/Ogwulimited/SMC-signal-bot/main/trades.json';
+
+    // Strictly real trades only - no sample data
+    let currentTrades = [];
+    let sortKey = 'date';
+    let sortAsc = false;
+    let filterOutcome = 'all';
+    let filterPair = 'all';
+    let searchQuery = '';
+    let countdown = 60;
+
+    function cleanSymbol(sym) {
+      if (!sym) return '—';
+      const c = sym.replace(/^frx/i, '');
+      return c.length === 6 ? `${c.slice(0, 3)}/${c.slice(3)}` : sym;
+    }
+
+    function formatPrice(val, sym) {
+      if (val === undefined || val === null || isNaN(val)) return '—';
+      const num = Number(val);
+      if (sym && sym.toUpperCase().includes('JPY')) {
+        const s = String(val);
+        const dec = s.includes('.') ? s.split('.')[1].length : 3;
+        return num.toFixed(Math.min(Math.max(dec, 3), 5));
+      }
+      return num.toFixed(5);
+    }
+
+    function formatDuration(sec) {
+      if (!sec || isNaN(sec) || sec <= 0) return '—';
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      return h === 0 ? `${m}m` : `${h}h ${m}m`;
+    }
+
+    function formatEpoch(ep) {
+      if (!ep || isNaN(ep)) return '—';
+      const d = new Date(ep * 1000);
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const month = months[d.getMonth()] || 'Oct';
+      const day = d.getDate();
+      const year = d.getFullYear();
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      return `${month} ${day}, ${year}, ${hours}:${minutes}`;
+    }
+
+    function computeStats(trades) {
+      const closed = trades.filter(t => t.outcome !== 'open' && (t.exit_epoch || t.exit_price));
+      const total = closed.length;
+      const wins = closed.filter(t => t.outcome === 'win').length;
+      const losses = closed.filter(t => t.outcome === 'loss').length;
+      const timeouts = closed.filter(t => t.outcome === 'timeout').length;
+
+      const winRate = total > 0 ? ((wins / total) * 100).toFixed(1) + '%' : '—';
+      const winTrades = closed.filter(t => t.outcome === 'win' && typeof t.rr_actual === 'number');
+      const avgRR = winTrades.length > 0
+        ? '+' + (winTrades.reduce((acc, t) => acc + t.rr_actual, 0) / winTrades.length).toFixed(2) + 'R'
+        : '—';
+
+      const netR = closed.reduce((acc, t) => acc + (t.rr_actual || 0), 0);
+
+      let best = '—';
+      let worst = '—';
+      const rrs = closed.map(t => t.rr_actual).filter(r => typeof r === 'number' && !isNaN(r));
+      if (rrs.length > 0) {
+        const maxR = Math.max(...rrs);
+        const minR = Math.min(...rrs);
+        best = maxR > 0 ? `+${maxR.toFixed(2)}R` : `${maxR.toFixed(2)}R`;
+        worst = `${minR.toFixed(2)}R`;
+      }
+
+      const durTrades = closed.filter(t => t.duration_seconds > 0);
+      const avgDur = durTrades.length > 0
+        ? Math.round(durTrades.reduce((acc, t) => acc + t.duration_seconds, 0) / durTrades.length)
+        : 0;
+
+      return {
+        total,
+        wins,
+        losses,
+        timeouts,
+        winRate,
+        avgRR,
+        netR: total > 0 ? (Number(netR) > 0 ? `+${netR.toFixed(2)}R` : `${netR.toFixed(2)}R`) : '0.00R',
+        best,
+        worst,
+        avgDur
+      };
+    }
+
+    function updateStatsUI() {
+      const s = computeStats(currentTrades);
+      document.getElementById('stat-win-rate').textContent = s.winRate;
+      document.getElementById('stat-win-detail').textContent = s.total > 0 ? `${s.wins} of ${s.total} hit TP` : 'Awaiting closed trades';
+      document.getElementById('stat-tally').textContent = `${s.wins}W · ${s.losses}L · ${s.timeouts}TO`;
+      document.getElementById('stat-net-r').textContent = s.netR;
+      const yieldEl = document.getElementById('stat-net-yield');
+      if (yieldEl) {
+        yieldEl.textContent = s.total > 0 ? `${s.wins} Wins Accrued` : 'Sum of rr_actual';
+      }
+      document.getElementById('stat-avg-rr').textContent = s.avgRR;
+      document.getElementById('stat-total-closed').textContent = s.total;
+      document.getElementById('stat-best-trade').textContent = s.best;
+      document.getElementById('stat-worst-trade').textContent = s.worst;
+      document.getElementById('stat-avg-duration').textContent = s.avgDur > 0 ? formatDuration(s.avgDur) : '—';
+
+      const openCount = currentTrades.filter(t => t.outcome === 'open' || (!t.exit_epoch && !t.exit_price)).length;
+      document.getElementById('stat-open-count').textContent = `${openCount} Active setups`;
+
+      if (s.total > 0) {
+        document.getElementById('bar-win').style.width = `${(s.wins / s.total) * 100}%`;
+        document.getElementById('bar-timeout').style.width = `${(s.timeouts / s.total) * 100}%`;
+        document.getElementById('bar-loss').style.width = `${(s.losses / s.total) * 100}%`;
+      } else {
+        document.getElementById('bar-win').style.width = '0%';
+        document.getElementById('bar-timeout').style.width = '0%';
+        document.getElementById('bar-loss').style.width = '0%';
+      }
+
+      document.getElementById('count-all').textContent = currentTrades.length;
+      document.getElementById('count-win').textContent = s.wins;
+      document.getElementById('count-loss').textContent = s.losses;
+      document.getElementById('count-timeout').textContent = s.timeouts;
+      document.getElementById('record-count-text').textContent = `(${currentTrades.length} ${currentTrades.length === 1 ? 'trade' : 'trades'} recorded)`;
+    }
+
+    function renderLedger() {
+      const emptyEl = document.getElementById('empty-state');
+      const controlsEl = document.getElementById('controls-bar');
+      const tableEl = document.getElementById('table-card');
+      const cardsEl = document.getElementById('cards-view');
+      const tbody = document.getElementById('trade-tbody');
+
+      if (currentTrades.length === 0) {
+        emptyEl.style.display = 'block';
+        controlsEl.style.display = 'none';
+        tableEl.style.display = 'none';
+        cardsEl.style.display = 'none';
+        return;
+      }
+
+      controlsEl.style.display = 'flex';
+
+      let list = [...currentTrades];
+      if (filterOutcome !== 'all') {
+        list = list.filter(t => t.outcome === filterOutcome);
+      }
+      if (filterPair !== 'all') {
+        list = list.filter(t => cleanSymbol(t.symbol) === filterPair);
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        list = list.filter(t =>
+          cleanSymbol(t.symbol).toLowerCase().includes(q) ||
+          t.direction.toLowerCase().includes(q) ||
+          (t.target_kind && t.target_kind.toLowerCase().includes(q)) ||
+          (t.note && t.note.toLowerCase().includes(q))
+        );
+      }
+
+      list.sort((a, b) => {
+        let aVal = 0, bVal = 0;
+        switch (sortKey) {
+          case 'date': aVal = a.exit_epoch || a.sent_epoch || 0; bVal = b.exit_epoch || b.sent_epoch || 0; break;
+          case 'symbol': aVal = cleanSymbol(a.symbol); bVal = cleanSymbol(b.symbol); break;
+          case 'direction': aVal = a.direction; bVal = b.direction; break;
+          case 'entry': aVal = a.entry; bVal = b.entry; break;
+          case 'stop': aVal = a.stop; bVal = b.stop; break;
+          case 'target': aVal = a.target; bVal = b.target; break;
+          case 'exit': aVal = a.exit_price || 0; bVal = b.exit_price || 0; break;
+          case 'outcome': aVal = a.outcome; bVal = b.outcome; break;
+          case 'rr_actual': aVal = a.rr_actual || 0; bVal = b.rr_actual || 0; break;
+          case 'duration': aVal = a.duration_seconds || 0; bVal = b.duration_seconds || 0; break;
+          case 'target_kind': aVal = a.target_kind || ''; bVal = b.target_kind || ''; break;
+        }
+        if (aVal < bVal) return sortAsc ? -1 : 1;
+        if (aVal > bVal) return sortAsc ? 1 : -1;
+        return 0;
+      });
+
+      if (list.length === 0) {
+        emptyEl.style.display = 'block';
+        tableEl.style.display = 'none';
+        cardsEl.style.display = 'none';
+        return;
+      }
+
+      emptyEl.style.display = 'none';
+      tableEl.style.display = '';
+      cardsEl.style.display = '';
+
+      // Populate Table
+      tbody.innerHTML = list.map(t => {
+        const isWin = t.outcome === 'win';
+        const isLoss = t.outcome === 'loss';
+        const isTimeout = t.outcome === 'timeout';
+        const rVal = t.rr_actual || 0;
+        const rColor = isTimeout ? 'color: #94a3b8;' : isWin ? 'color: #34d399; font-weight: 700;' : 'color: #fda4af; font-weight: 700;';
+        const rText = isTimeout ? '0.00R' : rVal > 0 ? `+${rVal.toFixed(2)}R` : `${rVal.toFixed(2)}R`;
+
+        return `
+          <tr>
+            <td>${formatEpoch(t.exit_epoch || t.sent_epoch)}</td>
+            <td><strong style="color: #fff;">${cleanSymbol(t.symbol)}</strong></td>
+            <td>
+              <span class="badge ${t.direction.toLowerCase() === 'bullish' ? 'badge-bullish' : 'badge-bearish'}">
+                ${t.direction.toLowerCase() === 'bullish' ? '↗' : '↘'} ${t.direction.toUpperCase()}
+              </span>
+            </td>
+            <td class="text-right">${formatPrice(t.entry)}</td>
+            <td class="text-right" style="color: #fda4af;">${formatPrice(t.stop)}</td>
+            <td class="text-right" style="color: #6ee7b7;">${formatPrice(t.target)}</td>
+            <td class="text-right" style="color: #fff; font-weight: 600;">${formatPrice(t.exit_price)}</td>
+            <td class="text-center">
+              <span class="badge ${isWin ? 'badge-win' : isLoss ? 'badge-loss' : 'badge-timeout'}">
+                ${t.outcome}
+              </span>
+            </td>
+            <td class="text-right" style="${rColor}">
+              <div>${rText}</div>
+            </td>
+            <td class="text-right">${formatDuration(t.duration_seconds)}</td>
+            <td style="max-width: 220px; overflow: hidden; text-overflow: ellipsis;">
+              <span style="color: #fff; font-weight: 500;">${t.target_kind}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // Populate Cards
+      cardsEl.innerHTML = list.map(t => {
+        const isWin = t.outcome === 'win';
+        const isLoss = t.outcome === 'loss';
+        const isTimeout = t.outcome === 'timeout';
+        const rVal = t.rr_actual || 0;
+        const rColor = isTimeout ? 'color: #94a3b8;' : isWin ? 'color: #34d399;' : 'color: #fda4af;';
+        const rText = isTimeout ? '0.00R' : rVal > 0 ? `+${rVal.toFixed(2)}R` : `${rVal.toFixed(2)}R`;
+
+        return `
+          <div class="trade-card" style="border-color: ${isWin ? 'rgba(16,185,129,0.35)' : isLoss ? 'rgba(244,63,94,0.35)' : '#1e2538'};">
+            <div class="trade-card-top">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: #fff;">${cleanSymbol(t.symbol)}</span>
+                <span class="badge ${t.direction.toLowerCase() === 'bullish' ? 'badge-bullish' : 'badge-bearish'}">
+                  ${t.direction.toUpperCase()}
+                </span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="badge ${isWin ? 'badge-win' : isLoss ? 'badge-loss' : 'badge-timeout'}">${t.outcome}</span>
+                <div style="text-align: right;">
+                  <span style="font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; ${rColor}">${rText}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="trade-card-grid">
+              <div class="trade-card-cell">
+                <span class="trade-card-cell-label">ENTRY</span>
+                <span class="trade-card-cell-val" style="color: #e2e8f0;">${formatPrice(t.entry, t.symbol)}</span>
+              </div>
+              <div class="trade-card-cell">
+                <span class="trade-card-cell-label">STOP LOSS</span>
+                <span class="trade-card-cell-val" style="color: #fda4af;">${formatPrice(t.stop, t.symbol)}</span>
+              </div>
+              <div class="trade-card-cell">
+                <span class="trade-card-cell-label">TARGET</span>
+                <span class="trade-card-cell-val" style="color: #6ee7b7;">${formatPrice(t.target, t.symbol)}</span>
+              </div>
+              <div class="trade-card-cell">
+                <span class="trade-card-cell-label">EXIT</span>
+                <span class="trade-card-cell-val" style="color: #fff;">${formatPrice(t.exit_price, t.symbol)}</span>
+              </div>
+            </div>
+
+            <div class="trade-card-meta">
+              <div class="trade-card-meta-row1">
+                <span class="trade-card-tag">${t.target_kind || 'SMC Liquidity'}</span>
+                <span style="color: #cbd5e1; font-size: 12px;">${formatDuration(t.duration_seconds)}</span>
+              </div>
+              <div class="trade-card-date">
+                <span style="color: #94a3b8;">${formatEpoch(t.exit_epoch || t.sent_epoch)}</span>
+              </div>
+            </div>
+
+            ${t.note ? `<div class="trade-card-note">${t.note}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function fetchRemoteTrades() {
+      try {
+        const res = await fetch(`${DATA_SOURCE_URL}?t=${Date.now()}`);
+        if (res.ok) {
+          const text = await res.text();
+          if (text && text.trim() && text.trim() !== '404: Not Found') {
+            const data = JSON.parse(text);
+            if (data && Array.isArray(data.trades)) {
+              currentTrades = data.trades;
+            } else {
+              currentTrades = [];
+            }
+          } else {
+            currentTrades = [];
+          }
+        } else {
+          currentTrades = [];
+        }
+      } catch (e) {
+        currentTrades = [];
+      } finally {
+        updateStatsUI();
+        populatePairFilter();
+        renderLedger();
+        document.getElementById('last-updated-text').textContent = 'Last checked: ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        countdown = 60;
+      }
+    }
+
+    function populatePairFilter() {
+      const select = document.getElementById('pair-select');
+      const set = new Set();
+      currentTrades.forEach(t => { if (t.symbol) set.add(cleanSymbol(t.symbol)); });
+      const currentVal = select.value;
+      select.innerHTML = '<option value="all">All Instruments</option>' + Array.from(set).map(p => `<option value="${p}">${p}</option>`).join('');
+      if (set.has(currentVal)) select.value = currentVal;
+    }
+
+    // Event Listeners
+    document.querySelectorAll('.pill-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.pill-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filterOutcome = btn.dataset.filter;
+        renderLedger();
+      });
+    });
+
+    document.getElementById('pair-select').addEventListener('change', e => {
+      filterPair = e.target.value;
+      renderLedger();
+    });
+
+    document.getElementById('search-input').addEventListener('input', e => {
+      searchQuery = e.target.value;
+      renderLedger();
+    });
+
+    document.getElementById('btn-manual-sync').addEventListener('click', () => {
+      fetchRemoteTrades();
+    });
+
+    // Sorting headers
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const key = th.dataset.sort;
+        if (sortKey === key) {
+          sortAsc = !sortAsc;
+        } else {
+          sortKey = key;
+          sortAsc = false;
+        }
+        document.querySelectorAll('th[data-sort] span').forEach(s => s.textContent = '↕');
+        const indicator = th.querySelector('span');
+        if (indicator) indicator.textContent = sortAsc ? '↑' : '↓';
+        renderLedger();
+      });
+    });
+
+    // Countdown interval
+    setInterval(() => {
+      countdown--;
+      if (countdown <= 0) {
+        fetchRemoteTrades();
+      } else {
+        document.getElementById('sync-counter').textContent = `(${countdown}s)`;
+      }
+    }, 1000);
+
+    // Initial setup
+    updateStatsUI();
+    populatePairFilter();
+    renderLedger();
+    fetchRemoteTrades();
+  </script>
+</body>
+</html>

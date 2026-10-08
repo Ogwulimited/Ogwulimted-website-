@@ -1,0 +1,23 @@
+# robots.txt for OGWU LTD (https://ais-pre-yjvgalbyhusjwwnnqv5dbs-347177991661.europe-west1.run.app)
+# Optimized for Googlebot and standard search indexers
+
+User-agent: Googlebot
+Allow: /
+Allow: /#projects
+Allow: /#forex
+Allow: /#buildlog
+Allow: /#about
+Allow: /#faq
+Allow: /#contact
+Allow: /logo.png
+Allow: /headshot.jpg
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://ais-pre-yjvgalbyhusjwwnnqv5dbs-347177991661.europe-west1.run.app/sitemap.xml

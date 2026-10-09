@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
-import { Home, User, TrendingUp, Briefcase, Calendar, Compass, Sparkles, BookOpen, Mail, Moon, Sun, Calculator, ArrowUpRight, HelpCircle } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Home, User, TrendingUp, Briefcase, Calendar, Compass, Sparkles, BookOpen, Mail, Calculator, ArrowUpRight, HelpCircle } from 'lucide-react';
+import { ThemeToggle } from './ThemeToggle';
 
 interface SidebarProps {
   onOpenCalculator: () => void;
@@ -8,18 +8,6 @@ interface SidebarProps {
 }
 
 export function Sidebar({ onOpenCalculator, onSelectDomain }: SidebarProps) {
-  const [isDark, setIsDark] = useState(true);
-
-  useEffect(() => {
-    if (document.documentElement.classList.contains('dark')) {
-      setIsDark(true);
-    }
-  }, []);
-
-  const toggleDark = () => {
-    document.documentElement.classList.toggle('dark');
-    setIsDark(document.documentElement.classList.contains('dark'));
-  };
 
   const links = [
     { id: 'hero', label: 'Overview', icon: <Home size={16} strokeWidth={2} />, domain: 'all' as const },
@@ -63,12 +51,14 @@ export function Sidebar({ onOpenCalculator, onSelectDomain }: SidebarProps) {
           </div>
 
           {/* Crest Logo */}
-          <div className="p-1 rounded-xl bg-[#141A26] border border-[#222B3D] shadow-inner shrink-0">
-            <img 
-              src="/logo.png" 
-              alt="Ogwu Limited Crest" 
-              className="w-14 h-auto object-contain filter brightness-110 drop-shadow"
-            />
+          <div className="flex flex-col items-end shrink-0">
+            <div className="p-1 rounded-xl bg-[#141A26] border border-[#222B3D] shadow-inner shrink-0">
+              <img 
+                src="/logo.png" 
+                alt="Ogwu Limited Crest" 
+                className="w-14 h-auto object-contain filter brightness-110 drop-shadow"
+              />
+            </div>
           </div>
         </div>
 
@@ -134,8 +124,8 @@ export function Sidebar({ onOpenCalculator, onSelectDomain }: SidebarProps) {
         </div>
       </div>
 
-      {/* Footer System Status & Dark/Light Toggle */}
-      <div className="pt-4 border-t border-[#1C2230] flex items-center justify-between">
+      {/* Footer System Status & Dark/Light Toggle Switch */}
+      <div className="pt-4 border-t border-[#1C2230] flex items-center justify-between gap-2">
         <div className="flex flex-col">
           <span className="text-[11px] font-display font-semibold text-neutral-400">
             Francis Ogwu
@@ -144,13 +134,7 @@ export function Sidebar({ onOpenCalculator, onSelectDomain }: SidebarProps) {
             System Online · 2026
           </span>
         </div>
-        <button
-          onClick={toggleDark}
-          className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-[#161C2B] border border-transparent hover:border-[#222B3D] transition-colors cursor-pointer"
-          aria-label="Toggle Theme"
-        >
-          {isDark ? <Sun size={15} /> : <Moon size={15} />}
-        </button>
+        <ThemeToggle variant="switch" showLabels={true} />
       </div>
     </aside>
   );

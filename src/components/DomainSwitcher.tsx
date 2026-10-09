@@ -59,11 +59,11 @@ export function DomainSwitcher({
           })}
         </div>
 
-        {/* Quick Popover Lot Calculator Launch Button */}
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
+        {/* Quick Popover Lot Calculator */}
+        <div className="flex items-center w-full sm:w-auto justify-end shrink-0">
           <button
             onClick={onOpenCalculator}
-            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-display text-xs font-bold tracking-wider uppercase transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-emerald-950/40 border border-emerald-500/30"
+            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-display text-xs font-bold tracking-wider uppercase transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-emerald-950/40 border border-emerald-500/30 shrink-0"
           >
             <Calculator size={14} />
             <span>Lot Calculator</span>

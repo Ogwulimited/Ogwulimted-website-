@@ -20,6 +20,7 @@ import { FAQ } from './components/FAQ';
 import { Footer } from './components/Footer';
 import { LegalModals, type LegalModalType } from './components/LegalModals';
 import { CookieBanner } from './components/CookieBanner';
+import { ThemeProvider } from './context/ThemeContext';
 
 function FadeInSection({ children }: { children: ReactNode }) {
   return (
@@ -34,15 +35,12 @@ function FadeInSection({ children }: { children: ReactNode }) {
   );
 }
 
-export default function App() {
+function MainApp() {
   const [activeDomain, setActiveDomain] = useState<DomainType>('all');
   const [isCalculatorOpen, setIsCalculatorOpen] = useState<boolean>(false);
   const [activeLegalModal, setActiveLegalModal] = useState<LegalModalType>(null);
 
   useEffect(() => {
-    // Ensure document defaults to dark class for the executive dark aesthetic
-    document.documentElement.classList.add('dark');
-
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -254,5 +252,13 @@ export default function App() {
         onOpenPrivacy={() => setActiveLegalModal('privacy')}
       />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <MainApp />
+    </ThemeProvider>
   );
 }

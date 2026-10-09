@@ -263,25 +263,25 @@ export function RiskCalculatorModal({
             role="dialog"
             aria-modal="true"
             aria-labelledby="calculator-modal-title"
-            className="relative w-full max-w-xl bg-[#0C0F17] border border-[#1E2536] rounded-2xl shadow-2xl overflow-hidden z-10 m-auto text-neutral-200 font-sans max-h-[94vh] flex flex-col"
+            className="relative w-full max-w-lg bg-[#0C0F17] border border-[#1E2536] rounded-2xl shadow-2xl overflow-hidden z-10 m-auto text-neutral-200 font-sans max-h-[92dvh] flex flex-col my-auto"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-3.5 py-3 sm:px-5 sm:py-4 border-b border-[#1C2333] bg-[#10141D] shrink-0">
+            <div className="flex items-center justify-between px-3.5 py-2.5 sm:px-5 sm:py-3.5 border-b border-[#1C2333] bg-[#10141D] shrink-0">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
-                  <Calculator size={17} />
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                  <Calculator size={16} />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 id="calculator-modal-title" className="text-sm sm:text-base font-display font-bold text-white tracking-tight truncate">
                       Lot Size & Risk Calculator
                     </h3>
-                    <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase bg-emerald-950/70 text-emerald-300 border border-emerald-800/50">
+                    <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-mono font-bold uppercase bg-emerald-950/70 text-emerald-300 border border-emerald-800/50">
                       SMC Desk
                     </span>
                   </div>
-                  <p className="text-[11px] text-neutral-400 font-sans truncate">
-                    Exact position sizing with zero risk overshoots
+                  <p className="text-[10px] sm:text-[11px] text-neutral-400 font-sans truncate">
+                    Precision position sizing with zero risk overshoots
                   </p>
                 </div>
               </div>
@@ -297,33 +297,57 @@ export function RiskCalculatorModal({
 
             {/* Error or Warning banner */}
             {'error' in calcData && calcData.error && (
-              <div className="px-3.5 py-2 bg-rose-950/50 border-b border-rose-800/60 text-rose-300 text-xs font-mono flex items-center gap-2 shrink-0">
+              <div className="px-3.5 py-1.5 bg-rose-950/60 border-b border-rose-800/60 text-rose-300 text-xs font-mono flex items-center gap-2 shrink-0">
                 <AlertCircle size={14} className="shrink-0" />
                 <span className="truncate">{calcData.error}</span>
               </div>
             )}
             {'warning' in calcData && calcData.warning && (
-              <div className="px-3.5 py-2 bg-amber-950/50 border-b border-amber-800/60 text-amber-300 text-xs font-mono flex items-center gap-2 shrink-0">
+              <div className="px-3.5 py-1.5 bg-amber-950/60 border-b border-amber-800/60 text-amber-300 text-xs font-mono flex items-center gap-2 shrink-0">
                 <AlertCircle size={14} className="shrink-0" />
                 <span className="truncate">{calcData.warning}</span>
               </div>
             )}
 
-            {/* Content Body */}
-            <div className="p-3 sm:p-4.5 space-y-2.5 sm:space-y-3.5 overflow-y-auto flex-1 scrollbar-thin">
-              {/* Row 1: Risk Amount & Pair Dropdown (2 Columns) */}
+            {/* Content Body - Compact & Mobile Optimized */}
+            <div className="p-3 sm:p-4 space-y-2.5 sm:space-y-3 overflow-y-auto flex-1 scrollbar-thin">
+              {/* Row 1: Trading Pair & Risk Amount (2 Balanced Columns) */}
               <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                {/* Risk Amount */}
-                <div className="bg-[#121622] p-2.5 sm:p-3.5 rounded-xl border border-[#1E2638] flex flex-col justify-between">
+                {/* Trading Pair */}
+                <div className="bg-[#121622] p-2.5 rounded-xl border border-[#1E2638] flex flex-col justify-between">
                   <div className="flex justify-between items-center mb-1">
-                    <label htmlFor={riskInputId} className="text-[10px] sm:text-xs font-mono text-neutral-300 font-semibold uppercase tracking-wider">
+                    <label htmlFor={pairSelectId} className="text-[10px] sm:text-xs font-mono text-neutral-300 font-semibold uppercase tracking-wider truncate">
+                      Instrument
+                    </label>
+                    <span className="text-[9px] sm:text-[10px] font-mono text-emerald-400 tabular-nums shrink-0 ml-1">
+                      ${pipValueUSD.toFixed(2)}/pip
+                    </span>
+                  </div>
+                  <select
+                    id={pairSelectId}
+                    value={selectedSymbol}
+                    onChange={(e) => handlePairChange(e.target.value)}
+                    className="w-full bg-[#0A0D14] border border-[#222B3D] focus:border-emerald-500 rounded-lg px-2 sm:px-3 py-1.5 font-mono text-xs sm:text-sm text-white outline-none cursor-pointer"
+                  >
+                    {SUPPORTED_PAIRS.map(p => (
+                      <option key={p.symbol} value={p.symbol} className="bg-[#0A0D14] text-white">
+                        {p.symbol} {p.type === 'crypto' ? '(Crypto)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Risk Amount */}
+                <div className="bg-[#121622] p-2.5 rounded-xl border border-[#1E2638] flex flex-col justify-between">
+                  <div className="flex justify-between items-center mb-1">
+                    <label htmlFor={riskInputId} className="text-[10px] sm:text-xs font-mono text-neutral-300 font-semibold uppercase tracking-wider truncate">
                       Risk (USD)
                     </label>
-                    <span className="text-[11px] sm:text-xs font-mono font-bold text-emerald-400 tabular-nums">
+                    <span className="text-[10px] sm:text-xs font-mono font-bold text-emerald-400 tabular-nums shrink-0 ml-1">
                       ${riskAmount.toFixed(0)}
                     </span>
                   </div>
-                  <div className="relative mb-1.5">
+                  <div className="relative">
                     <span className="absolute left-2.5 top-1/2 -translate-y-1/2 font-mono text-neutral-500 text-xs sm:text-sm">$</span>
                     <input
                       id={riskInputId}
@@ -333,82 +357,62 @@ export function RiskCalculatorModal({
                       value={riskAmount || ''}
                       onChange={(e) => setRiskAmount(parseFloat(e.target.value) || 0)}
                       placeholder="25"
-                      className="w-full bg-[#0A0D14] border border-[#222B3D] focus:border-emerald-500 rounded-lg pl-6 pr-2 py-1 sm:py-1.5 font-mono text-xs sm:text-sm text-white tabular-nums outline-none transition-colors"
+                      className="w-full bg-[#0A0D14] border border-[#222B3D] focus:border-emerald-500 rounded-lg pl-6 pr-2 py-1.5 font-mono text-xs sm:text-sm text-white tabular-nums outline-none transition-colors"
                     />
                   </div>
-                  {/* Preset chips */}
-                  <div className="flex items-center gap-1 flex-wrap">
-                    {[25, 50, 100, 250, 500].map(val => (
-                      <button
-                        key={val}
-                        onClick={() => setRiskAmount(val)}
-                        className={`text-[9px] font-mono px-1.5 py-0.5 rounded transition-colors cursor-pointer ${
-                          riskAmount === val
-                            ? 'bg-emerald-500 text-slate-950 font-bold'
-                            : 'bg-[#182030] text-neutral-400 border border-[#243048] hover:text-white'
-                        }`}
-                      >
-                        ${val}
-                      </button>
-                    ))}
-                  </div>
                 </div>
+              </div>
 
-                {/* Trading Pair */}
-                <div className="bg-[#121622] p-2.5 sm:p-3.5 rounded-xl border border-[#1E2638] flex flex-col justify-between">
-                  <label htmlFor={pairSelectId} className="block text-[10px] sm:text-xs font-mono text-neutral-300 font-semibold uppercase tracking-wider mb-1">
-                    Trading Pair
-                  </label>
-                  <select
-                    id={pairSelectId}
-                    value={selectedSymbol}
-                    onChange={(e) => handlePairChange(e.target.value)}
-                    className="w-full bg-[#0A0D14] border border-[#222B3D] focus:border-emerald-500 rounded-lg px-2 sm:px-3 py-1 sm:py-1.5 font-mono text-xs text-white outline-none cursor-pointer"
-                  >
-                    {SUPPORTED_PAIRS.map(p => (
-                      <option key={p.symbol} value={p.symbol} className="bg-[#0A0D14] text-white">
-                        {p.symbol} {p.type === 'crypto' ? '(Crypto)' : ''}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="mt-1.5 text-[9px] sm:text-[10px] font-mono text-neutral-400 flex items-center justify-between">
-                    <span className="truncate">{isCrypto ? 'Point:' : 'Pip Value:'}</span>
-                    <span className="text-white font-semibold tabular-nums ml-1 shrink-0">
-                      ${pipValueUSD.toFixed(2)}
-                    </span>
-                  </div>
+              {/* Quick Risk Presets (Full-Width Responsive Row) */}
+              <div className="flex items-center justify-between gap-1.5 bg-[#0e121b] p-1.5 rounded-xl border border-[#1a2130]">
+                <span className="text-[9px] font-mono text-neutral-400 uppercase tracking-wider px-1 shrink-0 hidden xs:inline">
+                  Presets:
+                </span>
+                <div className="flex items-center justify-between gap-1 w-full">
+                  {[25, 50, 100, 250, 500].map(val => (
+                    <button
+                      key={val}
+                      onClick={() => setRiskAmount(val)}
+                      type="button"
+                      className={`flex-1 py-1 px-1 rounded text-center text-[10px] sm:text-xs font-mono font-semibold transition-all cursor-pointer ${
+                        riskAmount === val
+                          ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
+                          : 'bg-[#141a27] text-neutral-300 hover:text-white border border-[#222c40] hover:bg-[#1b2334]'
+                      }`}
+                    >
+                      ${val}
+                    </button>
+                  ))}
                 </div>
               </div>
 
               {/* Row 2: Entry Price & Stop Loss Price (2 Columns) */}
               <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 {/* Entry Price */}
-                <div className="bg-[#121622] p-2.5 sm:p-3.5 rounded-xl border border-[#1E2638]">
-                  <label htmlFor={entryInputId} className="block text-[10px] sm:text-xs font-mono text-neutral-300 font-semibold uppercase tracking-wider mb-1">
-                    Entry Price
-                  </label>
+                <div className="bg-[#121622] p-2.5 rounded-xl border border-[#1E2638]">
+                  <div className="flex justify-between items-center mb-1">
+                    <label htmlFor={entryInputId} className="text-[10px] sm:text-xs font-mono text-neutral-300 font-semibold uppercase tracking-wider truncate">
+                      Entry Price
+                    </label>
+                    {'isLong' in calcData && calcData.isLong !== undefined && (
+                      <span className={`text-[9px] sm:text-[10px] font-mono font-semibold shrink-0 ml-1 ${calcData.isLong ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        {calcData.isLong ? '▲ Long' : '▼ Short'}
+                      </span>
+                    )}
+                  </div>
                   <input
                     id={entryInputId}
                     type="number"
                     step="any"
                     value={entryPrice || ''}
                     onChange={(e) => setEntryPrice(parseFloat(e.target.value) || 0)}
-                    className="w-full bg-[#0A0D14] border border-[#222B3D] focus:border-emerald-500 rounded-lg px-2.5 py-1 sm:py-1.5 font-mono text-xs sm:text-sm text-white tabular-nums outline-none"
+                    className="w-full bg-[#0A0D14] border border-[#222B3D] focus:border-emerald-500 rounded-lg px-2.5 py-1.5 font-mono text-xs sm:text-sm text-white tabular-nums outline-none"
                     placeholder="1.08500"
                   />
-                  <div className="text-[9px] sm:text-[10px] font-mono mt-1 truncate">
-                    {'isLong' in calcData && calcData.isLong !== undefined ? (
-                      <span className={calcData.isLong ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold'}>
-                        {calcData.isLong ? '▲ Long Setup' : '▼ Short Setup'}
-                      </span>
-                    ) : (
-                      <span className="text-neutral-500">Execution</span>
-                    )}
-                  </div>
                 </div>
 
                 {/* Stop Loss Price */}
-                <div className="bg-[#121622] p-2.5 sm:p-3.5 rounded-xl border border-[#1E2638]">
+                <div className="bg-[#121622] p-2.5 rounded-xl border border-[#1E2638]">
                   <div className="flex justify-between items-center mb-1">
                     <label htmlFor={stopInputId} className="text-[10px] sm:text-xs font-mono text-neutral-300 font-semibold uppercase tracking-wider truncate">
                       Stop Loss
@@ -425,62 +429,59 @@ export function RiskCalculatorModal({
                     step="any"
                     value={stopPrice || ''}
                     onChange={(e) => setStopPrice(parseFloat(e.target.value) || 0)}
-                    className="w-full bg-[#0A0D14] border border-[#222B3D] focus:border-rose-500 rounded-lg px-2.5 py-1 sm:py-1.5 font-mono text-xs sm:text-sm text-white tabular-nums outline-none"
+                    className="w-full bg-[#0A0D14] border border-[#222B3D] focus:border-rose-500 rounded-lg px-2.5 py-1.5 font-mono text-xs sm:text-sm text-white tabular-nums outline-none"
                     placeholder="1.08200"
                   />
-                  <div className="text-[9px] sm:text-[10px] font-mono text-neutral-500 mt-1 truncate">
-                    <span>Invalidation Point</span>
-                  </div>
                 </div>
               </div>
 
-              {/* Row 3: Optional Take Profit Price */}
-              <div className="bg-[#121622] p-2.5 sm:p-3 rounded-xl border border-[#1E2638]">
+              {/* Row 3: Optional Take Profit Price (Streamlined) */}
+              <div className="bg-[#121622] p-2 sm:p-2.5 rounded-xl border border-[#1E2638]">
                 <div className="flex justify-between items-center mb-1">
                   <label htmlFor={tpInputId} className="text-[10px] sm:text-xs font-mono text-neutral-300 font-semibold uppercase tracking-wider">
-                    Take Profit <span className="text-[9px] text-neutral-500 font-normal">(Optional Target)</span>
+                    Take Profit <span className="text-[9px] text-neutral-500 font-normal">(Target)</span>
                   </label>
-                  {'rrRatio' in calcData && calcData.rrRatio !== null && !isNaN(calcData.rrRatio) && (
-                    <span className="text-[10px] sm:text-xs font-mono text-emerald-400 font-bold tabular-nums">
-                      R:R 1:{calcData.rrRatio.toFixed(2)}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-1.5">
+                    {'rrRatio' in calcData && calcData.rrRatio !== null && !isNaN(calcData.rrRatio) && (
+                      <span className="text-[9px] sm:text-[10px] font-mono text-emerald-400 font-bold tabular-nums">
+                        R:R 1:{calcData.rrRatio.toFixed(2)}
+                      </span>
+                    )}
+                    {'rewardUSD' in calcData && calcData.rewardUSD !== null && (
+                      <span className="text-[9px] sm:text-[10px] font-mono text-emerald-400 font-bold tabular-nums bg-emerald-950/60 border border-emerald-800/50 px-1.5 py-0.2 rounded">
+                        +${calcData.rewardUSD.toFixed(0)}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    id={tpInputId}
-                    type="number"
-                    step="any"
-                    value={takeProfitPrice}
-                    onChange={(e) => setTakeProfitPrice(e.target.value)}
-                    placeholder="e.g. 1.09450"
-                    className="w-full bg-[#0A0D14] border border-[#222B3D] focus:border-emerald-500 rounded-lg px-2.5 py-1 sm:py-1.5 font-mono text-xs sm:text-sm text-white tabular-nums outline-none"
-                  />
-                  {'rewardUSD' in calcData && calcData.rewardUSD !== null && (
-                    <span className="text-[10px] sm:text-xs font-mono text-emerald-400 font-bold tabular-nums shrink-0 bg-emerald-950/60 border border-emerald-800/50 px-2 py-1 rounded-md">
-                      +${calcData.rewardUSD.toFixed(0)}
-                    </span>
-                  )}
-                </div>
+                <input
+                  id={tpInputId}
+                  type="number"
+                  step="any"
+                  value={takeProfitPrice}
+                  onChange={(e) => setTakeProfitPrice(e.target.value)}
+                  placeholder="Optional target (e.g. 1.09450)"
+                  className="w-full bg-[#0A0D14] border border-[#222B3D] focus:border-emerald-500 rounded-lg px-2.5 py-1.5 font-mono text-xs sm:text-sm text-white tabular-nums outline-none"
+                />
               </div>
 
-              {/* Output Hero Banner */}
-              <div className="bg-gradient-to-br from-emerald-950/50 via-[#101726] to-[#0A0D14] border-2 border-emerald-500/40 rounded-xl p-3 sm:p-4 text-center shadow-lg">
+              {/* Output Hero Banner - Centralized & High-Impact */}
+              <div className="bg-gradient-to-br from-emerald-950/50 via-[#101726] to-[#0A0D14] border-2 border-emerald-500/40 rounded-xl p-3 sm:p-3.5 text-center shadow-lg">
                 <span className="text-[10px] sm:text-[11px] font-display font-semibold text-emerald-400 uppercase tracking-widest block">
                   Required Position Size
                 </span>
-                <div className="text-2xl sm:text-4xl font-display font-bold text-white tabular-nums tracking-tight my-0.5 sm:my-1">
+                <div className="text-2xl sm:text-3xl font-display font-bold text-white tabular-nums tracking-tight my-0.5 sm:my-1 flex items-center justify-center gap-2">
                   {'positionSize' in calcData && calcData.positionSize !== undefined ? (
                     isCrypto ? (
                       <>
-                        {calcData.positionSize.toFixed(calcData.positionSize >= 1 ? 3 : 5)}{' '}
+                        <span>{calcData.positionSize.toFixed(calcData.positionSize >= 1 ? 3 : 5)}</span>
                         <span className="text-xs sm:text-sm font-display font-semibold text-emerald-400">
                           {selectedSymbol.replace('USD', '')}
                         </span>
                       </>
                     ) : (
                       <>
-                        {calcData.positionSize.toFixed(2)}{' '}
+                        <span>{calcData.positionSize.toFixed(2)}</span>
                         <span className="text-xs sm:text-sm font-display font-semibold text-emerald-400">LOTS</span>
                       </>
                     )
@@ -490,7 +491,7 @@ export function RiskCalculatorModal({
                 </div>
 
                 {!isCrypto && 'positionSize' in calcData && calcData.positionSize !== undefined && (
-                  <div className="text-[10px] sm:text-xs font-mono text-neutral-300 flex justify-center items-center gap-2 sm:gap-3">
+                  <div className="text-[10px] sm:text-xs font-mono text-neutral-300 flex justify-center items-center gap-2 sm:gap-3 flex-wrap">
                     <span>Std: <strong>{calcData.positionSize.toFixed(2)}</strong></span>
                     <span className="text-neutral-600">·</span>
                     <span>Mini: <strong>{(calcData.positionSize * 10).toFixed(1)}</strong></span>
@@ -507,16 +508,16 @@ export function RiskCalculatorModal({
               </div>
             </div>
 
-            {/* Footer Actions */}
-            <div className="p-3 sm:p-4 border-t border-[#1C2333] bg-[#10141D] flex flex-col sm:flex-row items-center justify-between gap-2.5 shrink-0">
-              <span className="text-[10px] sm:text-[11px] text-neutral-400 font-mono text-center sm:text-left truncate max-w-full">
+            {/* Footer Actions - Centralized & Full Width for Mobile */}
+            <div className="p-3 sm:p-3.5 border-t border-[#1C2333] bg-[#10141D] flex flex-col sm:flex-row items-center justify-between gap-2 shrink-0">
+              <span className="text-[10px] text-neutral-400 font-mono text-center sm:text-left truncate max-w-full">
                 {pipFormula}
               </span>
 
               <button
                 onClick={copySummary}
                 disabled={'error' in calcData && !!calcData.error}
-                className="w-full sm:w-auto px-5 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-display font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 shrink-0"
+                className="w-full sm:w-auto px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-display font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 shrink-0"
               >
                 {copied ? (
                   <>

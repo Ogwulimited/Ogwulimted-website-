@@ -147,9 +147,19 @@
       ]
     }
     </script>
+  <link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#0b0f19" />
+<link rel="apple-touch-icon" href="/icons/icon-192.png" />
   </head>
   <body class="bg-[#0A0D14] text-[#E8EAED]">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+  <script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js");
+    });
+  }
+  </script>
   </body>
 </html>

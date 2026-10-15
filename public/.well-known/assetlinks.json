@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.ogwulimited.app",
+    "sha256_cert_fingerprints": ["7E:4C:48:DB:34:26:5A:CC:AB:26:10:9C:65:8F:E3:94:EA:BC:50:01:2C:69:48:0E:60:9A:59:E6:C4:CC:D2:63"]
+  }
+}]
